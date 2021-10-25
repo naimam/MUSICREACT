@@ -5,6 +5,20 @@ import { useState, useRef } from 'react';
 
 function App() {
 	const args = JSON.parse(document.getElementById("data").text);
+	const [numClicks, setNumClicks] = useState(0);
+	function onButtonCLick() {
+		console.log(JSON.stringify({ "num_clicks": numClicks }));
+		fetch('/increment', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ "num_clicks": numClicks }),
+		}).then(response => response.json()).then(data => {
+			console.log(data);
+			setNumClicks(data.num_clicks_server);
+		});
+	}
 	return (
 		<body>
 			<div class="topnav">
@@ -12,20 +26,24 @@ function App() {
 					<a href="https://github.com/csc4350-f21/project2-nmohamed6"><i class="fab fa-github"></i></a>
 				</h1>
 				<h1>{args.current_username} music!</h1>
-				<h1><a href="{ url_for('logout')}">
+				<h1><a href="/logout">
 					<i class="fas fa-sign-out-alt"></i></a>
 				</h1>
 			</div>
 			<main id="main">
 				<div>
 					<p>Add an artist ID!</p>
+					<button onClick={onButtonCLick}>Click me</button>
+					<p>Button has been clicked {numClicks} times!</p>
+
+
 					<form method="POST">
 						<input type="text" name="artistId" placeholder="Artist ID" required />
 						<input type="submit" value="Submit!" />
 					</form>
 				</div>
 
-				{args.artist_len ? (
+				{args.has_artists_saved ? (
 					<div class="row">
 						<div class="column">
 							<div class="card">

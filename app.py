@@ -13,6 +13,8 @@ from flask import (
     flash,
     Blueprint,
     url_for,
+    json,
+    jsonify,
 )
 from spotify import get_artist_info
 from genius import get_lyrics
@@ -69,51 +71,41 @@ class Artist(db.Model):
 bp = Blueprint("bp", __name__, template_folder="./build")
 
 
-@bp.route("/index")
+@bp.route("/index", methods=["POST", "GET"])
 @login_required
 def index():
     # TODO: insert the data fetched by your app main page here as a JSON
     currentUser = Person.query.filter_by(username=current_user.username).first()
-    if request.method == "POST":
-        artistID = request.form.get("artistId")
-        try:
-            get_artist_info(artistID)
-        except:
-            flash("Invalid Spotify Artist ID!")
-            return redirect(url_for("bp.index"))
-
-        artist = Artist(artist_id=artistID, person=currentUser)
-
-        db.session.add(artist)
-        db.session.commit()
-
-        flash("Artist added!")
-
+    current_username = current_user.username
     user_artists = currentUser.artists
     user_artist_ids = []
     for artists in user_artists:
         if artists.artist_id not in user_artist_ids:
             user_artist_ids.append(artists.artist_id)
 
-    try:
-        ARTIST_IDS = user_artist_ids
-        artist_len = len(ARTIST_IDS)
+    has_artists_saved = len(user_artist_ids) > 0
+    if has_artists_saved:
+        artist_len = len(user_artist_ids)
         random_artist = random.randint(0, artist_len - 1)
+        artist = user_artist_ids[random_artist]
+        (name, img, track) = get_artist_info(artist)
+        (trackName, trackAudio, trackImg) = track
+        lyricLink = get_lyrics(name, trackName)
 
-    except:
-        ARTIST_IDS = ["5cj0lLjcoR7YOSnhnX0Po5"]  # doja cat
-        artist_len = 0
-        random_artist = 0
-
-    artist = ARTIST_IDS[random_artist]
-    (name, img, track) = get_artist_info(artist)
-    (trackName, trackAudio, trackImg) = track
-    lyricLink = get_lyrics(name, trackName)
-    current_username = current_user.username
-
+    else:
+        (artist_len, name, img, track, trackName, trackImg, trackAudio, lyricLink) = (
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
     DATA = {
         "current_username": current_username,
-        "artist_len": artist_len,
+        "has_artists_saved": has_artists_saved,
         "name": name,
         "img": img,
         "track": track,
@@ -139,11 +131,6 @@ login.login_view = "login"
 @login.user_loader
 def load_user(id):
     return Person.query.get(id)
-
-
-@app.errorhandler(401)
-def page_not_found(e):
-    return Response("<p>Login failed</p>")
 
 
 @app.before_first_request
@@ -194,63 +181,33 @@ def main():
     return redirect("/login")
 
 
-@app.route("/foo", methods=["POST", "GET"])
-@login_required
-def foo():
+@app.route("/save", methods=["POST"])
+def save():
     currentUser = Person.query.filter_by(username=current_user.username).first()
-    if request.method == "POST":
-        artistID = request.form.get("artistId")
-        try:
-            get_artist_info(artistID)
-        except:
-            flash("Invalid Spotify Artist ID!")
-            return redirect(url_for("bp.index"))
-
-        artist = Artist(artist_id=artistID, person=currentUser)
-
-        db.session.add(artist)
-        db.session.commit()
-
-        flash("Artist added!")
-
-    user_artists = currentUser.artists
-    user_artist_ids = []
-    for artists in user_artists:
-        if artists.artist_id not in user_artist_ids:
-            user_artist_ids.append(artists.artist_id)
-
+    artistID = request.form.get("artistId")
     try:
-        ARTIST_IDS = user_artist_ids
-        artist_len = len(ARTIST_IDS)
-        random_artist = random.randint(0, artist_len - 1)
-
+        get_artist_info(artistID)
     except:
-        ARTIST_IDS = ["5cj0lLjcoR7YOSnhnX0Po5"]  # doja cat
-        artist_len = 0
-        random_artist = 0
+        flash("Invalid Spotify Artist ID!")
+        return redirect(url_for("bp.index"))
 
-    artist = ARTIST_IDS[random_artist]
-    (name, img, track) = get_artist_info(artist)
-    (trackName, trackAudio, trackImg) = track
-    lyricLink = get_lyrics(name, trackName)
-
-    return render_template(
-        "index.html",
-        artist_len=artist_len,
-        name=name,
-        img=img,
-        track=track,
-        trackName=trackName,
-        trackImg=trackImg,
-        trackAudio=trackAudio,
-        lyricLink=lyricLink,
-    )
+    artist = Artist(artist_id=artistID, person=currentUser)
+    db.session.add(artist)
+    db.session.commit()
+    flash("Artist added!")
+    return redirect(url_for("bp.index"))
 
 
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect(url_for("bp.index"))
+
+
+@app.route("/increment", methods=["POST"])
+def increment():
+    num_clicks = request.json.get("num_clicks")
+    return jsonify({"num_clicks_server": num_clicks + 1})
 
 
 app.run(
