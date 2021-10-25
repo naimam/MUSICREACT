@@ -181,7 +181,7 @@ def foo():
         random_artist = 0
 
     artist = ARTIST_IDS[random_artist]
-    (name, img, track, topTracks) = get_artist_info(artist)
+    (name, img, track) = get_artist_info(artist)
     (trackName, trackAudio, trackImg) = track
     lyricLink = get_lyrics(name, trackName)
 
@@ -190,8 +190,6 @@ def foo():
         artist_len=artist_len,
         name=name,
         img=img,
-        len=len(topTracks),
-        topTracks=topTracks,
         track=track,
         trackName=trackName,
         trackImg=trackImg,
