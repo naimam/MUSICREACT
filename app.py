@@ -4,7 +4,16 @@ import random
 from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
-from flask import Flask, render_template, request, redirect, Response, flash, Blueprint
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    Response,
+    flash,
+    Blueprint,
+    url_for,
+)
 from spotify import get_artist_info
 from genius import get_lyrics
 from flask_login import (
@@ -96,14 +105,14 @@ def create_table():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if current_user.is_authenticated:
-        return redirect("/")
+        return redirect(url_for("bp.index"))
 
     if request.method == "POST":
         username = request.form["username"]
         user = Person.query.filter_by(username=username).first()
         if user is not None:
             login_user(user)
-            return redirect("/")
+            return redirect(url_for("bp.index"))
         if user is None:
             flash("Invalid username!")
     return render_template("login.html")
@@ -112,7 +121,7 @@ def login():
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if current_user.is_authenticated:
-        return redirect("/")
+        return redirect(url_for("bp.index"))
 
     if request.method == "POST":
         username = request.form["username"]
@@ -129,9 +138,16 @@ def register():
     return render_template("register.html")
 
 
-@app.route("/", methods=["POST", "GET"])
+@app.route("/")
+def main():
+    if current_user.is_authenticated:
+        return redirect(url_for("bp.index"))
+    return redirect("/login")
+
+
+@app.route("/foo", methods=["POST", "GET"])
 @login_required
-def index():
+def foo():
     currentUser = Person.query.filter_by(username=current_user.username).first()
     if request.method == "POST":
         artistID = request.form.get("artistId")
@@ -139,7 +155,7 @@ def index():
             get_artist_info(artistID)
         except:
             flash("Invalid Spotify Artist ID!")
-            return redirect("/")
+            return redirect(url_for("bp.index"))
 
         artist = Artist(artist_id=artistID, person=currentUser)
 
@@ -170,7 +186,7 @@ def index():
     lyricLink = get_lyrics(name, trackName)
 
     return render_template(
-        "music.html",
+        "index.html",
         artist_len=artist_len,
         name=name,
         img=img,
@@ -187,7 +203,7 @@ def index():
 @app.route("/logout")
 def logout():
     logout_user()
-    return redirect("/")
+    return redirect(url_for("bp.index"))
 
 
 app.run(
