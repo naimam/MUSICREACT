@@ -43,7 +43,7 @@ app.config["SECRET_KEY"] = SECRET_KEY
 db = SQLAlchemy()
 db.init_app(app)
 
-
+# db model
 class Person(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False)
@@ -65,6 +65,7 @@ class Artist(db.Model):
         return "<Artist Id: {}>".format(self.artist_id)
 
 
+# routes
 bp = Blueprint("bp", __name__, template_folder="./build")
 
 
@@ -72,7 +73,55 @@ bp = Blueprint("bp", __name__, template_folder="./build")
 @login_required
 def index():
     # TODO: insert the data fetched by your app main page here as a JSON
-    DATA = {"your": "data here"}
+    currentUser = Person.query.filter_by(username=current_user.username).first()
+    if request.method == "POST":
+        artistID = request.form.get("artistId")
+        try:
+            get_artist_info(artistID)
+        except:
+            flash("Invalid Spotify Artist ID!")
+            return redirect(url_for("bp.index"))
+
+        artist = Artist(artist_id=artistID, person=currentUser)
+
+        db.session.add(artist)
+        db.session.commit()
+
+        flash("Artist added!")
+
+    user_artists = currentUser.artists
+    user_artist_ids = []
+    for artists in user_artists:
+        if artists.artist_id not in user_artist_ids:
+            user_artist_ids.append(artists.artist_id)
+
+    try:
+        ARTIST_IDS = user_artist_ids
+        artist_len = len(ARTIST_IDS)
+        random_artist = random.randint(0, artist_len - 1)
+
+    except:
+        ARTIST_IDS = ["5cj0lLjcoR7YOSnhnX0Po5"]  # doja cat
+        artist_len = 0
+        random_artist = 0
+
+    artist = ARTIST_IDS[random_artist]
+    (name, img, track) = get_artist_info(artist)
+    (trackName, trackAudio, trackImg) = track
+    lyricLink = get_lyrics(name, trackName)
+    current_username = current_user.username
+
+    DATA = {
+        "current_username": current_username,
+        "artist_len": artist_len,
+        "name": name,
+        "img": img,
+        "track": track,
+        "trackName": trackName,
+        "trackImg": trackImg,
+        "trackAudio": trackAudio,
+        "lyricLink": lyricLink,
+    }
     data = json.dumps(DATA)
     return render_template(
         "index.html",
