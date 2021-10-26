@@ -97,9 +97,9 @@ function App() {
                 </ul>
                 <div>
                   <input type="text" ref={textInput} placeholder="Artist ID" required />
-                  <button type="button" onClick={addArtist}> Add artist</button>
+                  <button type="button" onClick={addArtist}>Add artist</button>
                 </div>
-                <button type="button" onClick={saveArtist}> SAVE CHANGES</button>
+                <button type="button" onClick={saveArtist}>Save</button>
 
               </div>
 
@@ -139,10 +139,10 @@ function App() {
               </ul>
 
               <div>
-                <input type="text" ref={textInput} placeholder="Artist ID" required />
-                <button type="button" onClick={addArtist}> Add artist</button>
+                <input type="text" ref={textInput} data-testid="input-artist" placeholder="Artist ID" required />
+                <button type="button" onClick={addArtist}>Add artist</button>
               </div>
-              <button type="button" onClick={saveArtist}>Save!</button>
+              <button type="button" onClick={saveArtist}>Save</button>
 
             </>
           )}

@@ -10,9 +10,10 @@
     "web-vitals": "^1.1.0"
   },
   "eslintIgnore": [
-    "setupTests.js",
-    "reportWebVitals.js",
-    "index.js"
+    "src/App.test.js",
+    "src/setupTests.js",
+    "src/reportWebVitals.js",
+    "src/index.js"
   ],
   "scripts": {
     "start": "react-scripts start",
