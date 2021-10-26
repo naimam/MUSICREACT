@@ -14,7 +14,23 @@ import './App.css';
 import { React, useState, useRef } from 'react';
 
 function App() {
-  const args = JSON.parse(document.getElementById('data').text);
+  let args;
+  if (document.getElementById('data') == null) {
+    // for testing:
+    args = {
+      current_username: 'clienttest',
+      has_artists_saved: true,
+      user_artist_ids: ['78rUTD7y6Cy67W1RVzYs7t', '18vetuyfF5U3hdFX1TA0nI'], // pinkpantheress, datfootdrive
+      img: '',
+      lyric_link: '',
+      name: '',
+      track_audio: '',
+      track_img: '',
+      track_name: '',
+    };
+  } else {
+    args = JSON.parse(document.getElementById('data').text);
+  }
   const currentUserIds = args.user_artist_ids;
   const [artistList, setartistList] = useState(currentUserIds);
   const textInput = useRef(null);
@@ -88,7 +104,7 @@ function App() {
                   {userSavedArtists}
                 </ul>
                 <div>
-                  <input type="text" ref={textInput} placeholder="Artist ID" required />
+                  <input type="text" data-testid="input-artist" ref={textInput} placeholder="Artist ID" required />
                   <button type="button" onClick={addArtist}>Add artist</button>
                 </div>
                 <button type="button" onClick={saveArtist}>Save</button>
