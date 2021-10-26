@@ -18,21 +18,15 @@ function App() {
   const currentUserIds = args.user_artist_ids;
   const [artistList, setartistList] = useState(currentUserIds);
   const textInput = useRef(null);
-  console.log('current user ids:', currentUserIds);
-  console.log('artist list:', artistList);
 
   function addArtist() {
     const toAdd = textInput.current.value;
-    console.log('text input current val:', toAdd);
     setartistList([...artistList, toAdd]);
     textInput.current.value = '';
-    console.log('add artist artist list:', artistList);
   }
 
   function deleteArtist(toDelete) {
-    console.log('to delete:', toDelete);
     setartistList(artistList.filter((artist) => artist !== toDelete));
-    console.log('delete artist list:', artistList);
   }
 
   function saveArtist() {
@@ -42,7 +36,6 @@ function App() {
       add: addList,
       delete: deleteList,
     };
-    console.log(JSON.stringify(update));
     fetch('/save', {
       method: 'POST',
       headers: {
@@ -52,7 +45,6 @@ function App() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         setartistList(data.user_artists_server);
         window.location.reload();
       });
