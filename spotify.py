@@ -1,8 +1,9 @@
+"""spotify.py: uses spotipy library to get a spotify artist's info and their track info"""
 import os
+import random
 from dotenv import find_dotenv, load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-import random
 
 load_dotenv(find_dotenv())
 CLIENT_ID = os.getenv("CLIENT_ID")
@@ -13,6 +14,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 
 def get_artist_info(artist_id):
+    """gets information on a spotify artist given a valid id."""
     artist_uri = "spotify:artist:" + artist_id
     artist_tracks = sp.artist_top_tracks(artist_uri)
     artist = sp.artist(artist_uri)

@@ -3,9 +3,7 @@
 */
 
 /* todo:
-  - fix react rendered in jsx error - eslint-disable
-  - fix once updated made, page not showing info until user refreshes
-  - fix linting errors
+  - fix python linting errors
   - add unit tests
   - deploy to heroku - fix workflow
   - fix sytling
@@ -71,7 +69,7 @@ function App() {
     <body>
       <div className="topnav">
         <h1>
-          <a href="https://github.com/csc4350-f21/project2-nmohamed6">
+          <a href="https://github.com/csc4350-f21/project3-nmohamed6">
             <i className="fab fa-github" />
           </a>
         </h1>
@@ -108,7 +106,7 @@ function App() {
               <div className="card">
                 <h1 id="title">
                   Artist:
-                  {args.name}
+                  {args.artist_name}
                 </h1>
                 <img id="artistImg" alt="Profilepic" src={args.img} />
               </div>
@@ -119,20 +117,15 @@ function App() {
               <div className="card">
                 <h1 id="title">
                   Now Playing:
-                  {args.trackName}
+                  {args.track_name}
                 </h1>
-                <img src={args.trackImg} alt="song" />
+                <img src={args.track_img} alt="song" />
                 <audio controls>
-                  <source src={args.trackAudio} type="audio/mpeg" />
+                  <source src={args.track_audio} type="audio/mpeg" />
                   <track kind="captions" Track audio />
                 </audio>
-                <p>
-                  NOTE: If audio player is not playing, the audio file is not available
-                  for this specific track.
-                  Refresh your browser to get new one!
-                </p>
                 <br />
-                <a href="{args.lyricLink}">Genius Lyrics</a>
+                <a href="{args.lyric_link}">Genius Lyrics</a>
               </div>
             </div>
           </div>
