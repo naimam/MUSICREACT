@@ -8,35 +8,34 @@ function App() {
 	const current_user_ids = args.user_artist_ids;
 	const [artistList, setartistList] = useState(current_user_ids);
 	const textInput = useRef(null);
-	//^	<button onClick={deleteArtist(artist)}>Delete</button>
-	var update;
+
+	let user_saved_artists = artistList.map((item) =>
+		<li>{item}
+			<button onClick={() => { deleteArtist(item) }}>Remove</button>
+		</li>
+	);
 
 	console.log("current user ids:", current_user_ids);
 	console.log("artist list:", artistList);
 
 	function addArtist() {
-		let artistId = textInput.current.value;
-		console.log("text input current val:", artistId);
-		setartistList([...artistList, artistId]);
+		let to_add = textInput.current.value;
+		console.log("text input current val:", to_add);
+		setartistList([...artistList, to_add]);
 		textInput.current.value = "";
 		console.log("add artist artist list:", artistList);
 	}
 
-	// function deleteArtist(artistId) {
-	// 	console.log(artistId);
-	// 	//delete_list.push(artistId);
-	// 	console.log(delete_list);
-	// 	setartistList(artistList.filter((artist) => artist !== artistId));
-	// 	console.log(artistList);
-	// }
+	function deleteArtist(to_delete) {
+		console.log("to delete:", to_delete);
+		setartistList(artistList.filter((artist) => artist !== to_delete));
+		console.log("delete artist list:", artistList);
+	}
 
 	function saveArtist() {
 		let add_list = artistList.filter(f => !current_user_ids.includes(f));
 		let delete_list = current_user_ids.filter(f => !artistList.includes(f));
-		console.log("add list: ", add_list);
-		console.log("delete list: ", delete_list);
-
-		update = {
+		var update = {
 			"add": add_list,
 			"delete": delete_list
 		}
@@ -52,26 +51,11 @@ function App() {
 			.then(data => {
 				console.log(data);
 				setartistList(data.user_artists_server);
-			})
-		window.location.reload();
-		window.location.reload();
 
+			})
+		window.location.href = "/"
 	}
 
-	// const [numClicks, setNumClicks] = useState(0);
-	// function onButtonCLick() {
-	// 	console.log(JSON.stringify({ "num_clicks": numClicks }));
-	// 	fetch('/increment', {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Content-Type': 'application/json'
-	// 		},
-	// 		body: JSON.stringify({ "num_clicks": numClicks }),
-	// 	}).then(response => response.json()).then(data => {
-	// 		console.log(data);
-	// 		setNumClicks(data.num_clicks_server);
-	// 	});
-	// }
 	return (
 		<body>
 			<div class="topnav">
@@ -84,12 +68,6 @@ function App() {
 				</h1>
 			</div>
 			<main id="main">
-				{/* <div>
-					<button onClick={onButtonCLick}>Click me</button>
-					<p>Button has been clicked {numClicks} times!</p>
-
-
-				</div> */}
 
 				{args.has_artists_saved ? (
 					<div class="row">
@@ -98,16 +76,14 @@ function App() {
 								<h1 id="title">
 									Your saved artists
 								</h1>
-								<ul>  {artistList.map((item) => <li>{item}</li>)}
+								<ul>
+									{user_saved_artists}
 								</ul>
-
-								<p>Add an artist ID!</p>
-
 								<div>
 									<input type="text" ref={textInput} placeholder="Artist ID" required />
 									<button onClick={addArtist}> Add artist</button>
 								</div>
-								<button onClick={saveArtist}>Save!</button>
+								<button onClick={saveArtist}> SAVE CHANGES</button>
 
 							</div>
 
@@ -135,9 +111,7 @@ function App() {
 						</div>
 					</div>
 				) :
-					(<><p> Looks like you haven't added any artists yet. </p>
-
-						<p>Add some artist IDs!</p>
+					(<><p> Looks like you haven't added any artists yet. Add some below:</p>
 
 						<ul>  {artistList.map((item) => <li>{item}</li>)}
 						</ul>

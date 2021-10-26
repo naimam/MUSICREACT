@@ -186,33 +186,29 @@ def logout():
     return redirect(url_for("bp.index"))
 
 
-@app.route("/increment", methods=["POST"])
-def increment():
-    num_clicks = request.json.get("num_clicks")
-    return jsonify({"num_clicks_server": num_clicks + 1})
-
-
 @app.route("/save", methods=["POST", "GET"])
 def save():
     currentUser = Person.query.filter_by(username=current_user.username).first()
     artists_to_add = []
     add_artists = request.json.get("add")
     artists_to_remove = request.json.get("delete")
-
-    for artist in add_artists:
-        try:
-            get_artist_info(artist)
-        except:
-            continue
-        artists_to_add.append(artist)
-
+    print("og artists:", currentUser.artists)
+    print("add:", add_artists)
+    if add_artists:
+        for artist in add_artists:
+            if artist not in currentUser.artists:
+                try:
+                    get_artist_info(artist)
+                except:
+                    continue
+                artists_to_add.append(artist)
+    print("artists to add:", artists_to_add)
     if artists_to_add:
         for artist in artists_to_add:
-            add_artist = Artist(artist_id=artist, person=currentUser)
-            db.session.add(add_artist)
-        db.session.commit()
-        jsonify({"status": "Artist(s) added!"})
-        return redirect(url_for("bp.index"))
+            new_artist = Artist(artist_id=artist, person_id=currentUser.id)
+            db.session.add(new_artist)
+            db.session.commit()
+            jsonify({"status": "Artist(s) added!"})
 
     if artists_to_remove:
         for artist in artists_to_remove:
@@ -220,11 +216,17 @@ def save():
             if delete_artist is not None:
                 db.session.delete(delete_artist)
 
+        print("artists to remove:", artists_to_remove)
         db.session.commit()
         jsonify({"status": "Artist(s) removed!"})
 
-    user_artists = currentUser.artists
-    return jsonify({"user_artists_server": user_artists})
+    current_user_artists = currentUser.artists
+    current_user_artist_ids = []
+    for artists in current_user_artists:
+        current_user_artist_ids.append(artists.artist_id)
+
+    print("updated artists:", current_user_artist_ids)
+    return jsonify({"user_artists_server": current_user_artist_ids})
 
 
 app.run(
