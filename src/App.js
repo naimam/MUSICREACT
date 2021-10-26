@@ -1,21 +1,21 @@
-import logo from './logo.svg';
 import './App.css';
 import { useState, useRef } from 'react';
 
-
+/*
+eslint
+*/
 function App() {
 	const args = JSON.parse(document.getElementById("data").text);
-	const current_user_ids = args.user_artist_ids;
-	const [artistList, setartistList] = useState(current_user_ids);
+	const currentUserIds = args.user_artist_ids;
+	const [artistList, setartistList] = useState(currentUserIds);
 	const textInput = useRef(null);
-
-	let user_saved_artists = artistList.map((item) =>
+	const userSavedArtists = artistList.map((item) =>
 		<li>{item}
 			<button onClick={() => { deleteArtist(item) }}>Remove</button>
 		</li>
 	);
 
-	console.log("current user ids:", current_user_ids);
+	console.log("current user ids:", currentUserIds);
 	console.log("artist list:", artistList);
 
 	function addArtist() {
@@ -33,8 +33,8 @@ function App() {
 	}
 
 	function saveArtist() {
-		let add_list = artistList.filter(f => !current_user_ids.includes(f));
-		let delete_list = current_user_ids.filter(f => !artistList.includes(f));
+		let add_list = artistList.filter(f => !currentUserIds.includes(f));
+		let delete_list = currentUserIds.filter(f => !artistList.includes(f));
 		var update = {
 			"add": add_list,
 			"delete": delete_list
@@ -77,7 +77,7 @@ function App() {
 									Your saved artists
 								</h1>
 								<ul>
-									{user_saved_artists}
+									{userSavedArtists}
 								</ul>
 								<div>
 									<input type="text" ref={textInput} placeholder="Artist ID" required />
