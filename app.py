@@ -1,3 +1,4 @@
+# pylint: disable=E1101, C0413, W1508, R0903, W0603
 import os
 import json
 import random
