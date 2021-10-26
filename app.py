@@ -77,6 +77,22 @@ def index():
     # TODO: insert the data fetched by your app main page here as a JSON
     currentUser = Person.query.filter_by(username=current_user.username).first()
     current_username = current_user.username
+    if request.method == "POST":
+        artistID = request.form.get("artistId")
+        try:
+            get_artist_info(artistID)
+        except:
+            flash("Invalid Spotify Artist ID!")
+            return redirect("/")
+
+        artist = Artist(artist_id=artistID, person=currentUser)
+
+        db.session.add(artist)
+        db.session.commit()
+
+        flash("Artist added!")
+        return redirect(url_for("bp.index"))
+
     user_artists = currentUser.artists
     user_artist_ids = []
     for artists in user_artists:
@@ -90,7 +106,7 @@ def index():
         artist = user_artist_ids[random_artist]
         (name, img, track) = get_artist_info(artist)
         (trackName, trackAudio, trackImg) = track
-        lyricLink = get_lyrics(name, trackName)
+        lyricLink = get_lyrics(trackName)
 
     else:
         (artist_len, name, img, track, trackName, trackImg, trackAudio, lyricLink) = (
@@ -106,6 +122,7 @@ def index():
     DATA = {
         "current_username": current_username,
         "has_artists_saved": has_artists_saved,
+        "user_artist_ids": user_artist_ids,
         "name": name,
         "img": img,
         "track": track,
@@ -181,21 +198,21 @@ def main():
     return redirect("/login")
 
 
-@app.route("/save", methods=["POST"])
-def save():
-    currentUser = Person.query.filter_by(username=current_user.username).first()
-    artistID = request.form.get("artistId")
-    try:
-        get_artist_info(artistID)
-    except:
-        flash("Invalid Spotify Artist ID!")
-        return redirect(url_for("bp.index"))
+# @app.route("/save", methods=["POST"])
+# def save():
+#     currentUser = Person.query.filter_by(username=current_user.username).first()
+#     artistID = request.form.get("artistId")
+#     try:
+#         get_artist_info(artistID)
+#     except:
+#         flash("Invalid Spotify Artist ID!")
+#         return redirect(url_for("bp.index"))
 
-    artist = Artist(artist_id=artistID, person=currentUser)
-    db.session.add(artist)
-    db.session.commit()
-    flash("Artist added!")
-    return redirect(url_for("bp.index"))
+#     artist = Artist(artist_id=artistID, person=currentUser)
+#     db.session.add(artist)
+#     db.session.commit()
+#     flash("Artist added!")
+#     return redirect(url_for("bp.index"))
 
 
 @app.route("/logout")

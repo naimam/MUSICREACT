@@ -5,6 +5,10 @@ import { useState, useRef } from 'react';
 
 function App() {
 	const args = JSON.parse(document.getElementById("data").text);
+	const user_saved_artists = args.user_artist_ids.map((artist) =>
+		<li>{artist}</li>
+	);
+
 	const [numClicks, setNumClicks] = useState(0);
 	function onButtonCLick() {
 		console.log(JSON.stringify({ "num_clicks": numClicks }));
@@ -48,14 +52,19 @@ function App() {
 						<div class="column">
 							<div class="card">
 								<h1 id="title">
+									Your saved artists
+								</h1>
+								<ul>{user_saved_artists}</ul>
+							</div>
+
+							<div class="card">
+								<h1 id="title">
 									Artist: {args.name}
 								</h1>
 								<img id="artistImg" src={args.img} />
 							</div>
 
-							<div class="card">
-								<p> user's saved artists here</p>
-							</div>
+
 						</div>
 
 						<div class="column">
