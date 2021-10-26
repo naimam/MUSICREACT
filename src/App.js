@@ -1,9 +1,10 @@
+/* eslint-disable */
+/* to ignore: react/no-array-index-key, react-hooks/exhaustive-deps, react/jsx-filename-extension
+*/
+
 import './App.css';
 import { useState, useRef } from 'react';
 
-/*
-eslint
-*/
 function App() {
 	const args = JSON.parse(document.getElementById("data").text);
 	const currentUserIds = args.user_artist_ids;
