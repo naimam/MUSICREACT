@@ -1,8 +1,15 @@
+/* eslint-disable*/
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('1. artist added to list', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  const addButton = screen.getByText("Add artist");
+  expect(addButton).toBeInTheDocument();
+  const inputEl = screen.getByTestId("input-artist");
+  fireEvent.change(inputEl, {target: {value: "test"}});
+  fireEvent.click(addButton);
+
+  const newItem = screen.getByText("test");
+  expect(newItem).toBeInTheDocument();
 });
