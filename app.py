@@ -74,30 +74,12 @@ bp = Blueprint("bp", __name__, template_folder="./build")
 @bp.route("/index", methods=["POST", "GET"])
 @login_required
 def index():
-    # TODO: insert the data fetched by your app main page here as a JSON
     currentUser = Person.query.filter_by(username=current_user.username).first()
     current_username = current_user.username
-    if request.method == "POST":
-        artistID = request.form.get("artistId")
-        try:
-            get_artist_info(artistID)
-        except:
-            flash("Invalid Spotify Artist ID!")
-            return redirect("/")
-
-        artist = Artist(artist_id=artistID, person=currentUser)
-
-        db.session.add(artist)
-        db.session.commit()
-
-        flash("Artist added!")
-        return redirect(url_for("bp.index"))
-
     user_artists = currentUser.artists
     user_artist_ids = []
     for artists in user_artists:
-        if artists.artist_id not in user_artist_ids:
-            user_artist_ids.append(artists.artist_id)
+        user_artist_ids.append(artists.artist_id)
 
     has_artists_saved = len(user_artist_ids) > 0
     if has_artists_saved:
@@ -198,23 +180,6 @@ def main():
     return redirect("/login")
 
 
-# @app.route("/save", methods=["POST"])
-# def save():
-#     currentUser = Person.query.filter_by(username=current_user.username).first()
-#     artistID = request.form.get("artistId")
-#     try:
-#         get_artist_info(artistID)
-#     except:
-#         flash("Invalid Spotify Artist ID!")
-#         return redirect(url_for("bp.index"))
-
-#     artist = Artist(artist_id=artistID, person=currentUser)
-#     db.session.add(artist)
-#     db.session.commit()
-#     flash("Artist added!")
-#     return redirect(url_for("bp.index"))
-
-
 @app.route("/logout")
 def logout():
     logout_user()
@@ -225,6 +190,41 @@ def logout():
 def increment():
     num_clicks = request.json.get("num_clicks")
     return jsonify({"num_clicks_server": num_clicks + 1})
+
+
+@app.route("/save", methods=["POST", "GET"])
+def save():
+    currentUser = Person.query.filter_by(username=current_user.username).first()
+    artists_to_add = []
+    add_artists = request.json.get("add")
+    artists_to_remove = request.json.get("delete")
+
+    for artist in add_artists:
+        try:
+            get_artist_info(artist)
+        except:
+            continue
+        artists_to_add.append(artist)
+
+    if artists_to_add:
+        for artist in artists_to_add:
+            add_artist = Artist(artist_id=artist, person=currentUser)
+            db.session.add(add_artist)
+        db.session.commit()
+        jsonify({"status": "Artist(s) added!"})
+        return redirect(url_for("bp.index"))
+
+    if artists_to_remove:
+        for artist in artists_to_remove:
+            delete_artist = Artist.query.filter_by(artist_id=artist).first()
+            if delete_artist is not None:
+                db.session.delete(delete_artist)
+
+        db.session.commit()
+        jsonify({"status": "Artist(s) removed!"})
+
+    user_artists = currentUser.artists
+    return jsonify({"user_artists_server": user_artists})
 
 
 app.run(
