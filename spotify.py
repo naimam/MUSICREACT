@@ -32,19 +32,11 @@ def get_artist_info(artist_id):
         track_info.append(track["album"]["images"][0]["url"])
         return track_info
 
-    def get_artist_top_tracks(artist_tracks):
-        top_tracks = []
-        for track in artist_tracks["tracks"][:5]:
-            top_tracks.append(track["name"])
-        return top_tracks
-
     artist_name = get_artist_name(artist)
     artist_img = get_artist_img(artist)
     artist_track_info = get_artist_track_info(artist_tracks)
-    artist_top_tracks = get_artist_top_tracks(artist_tracks)
     return (
         artist_name,
         artist_img,
         artist_track_info,
-        artist_top_tracks,
     )

@@ -4,7 +4,18 @@ import random
 from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
-from flask import Flask, render_template, request, redirect, Response, flash, Blueprint
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    Response,
+    flash,
+    Blueprint,
+    url_for,
+    json,
+    jsonify,
+)
 from spotify import get_artist_info
 from genius import get_lyrics
 from flask_login import (
@@ -34,7 +45,7 @@ app.config["SECRET_KEY"] = SECRET_KEY
 db = SQLAlchemy()
 db.init_app(app)
 
-
+# db model
 class Person(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False)
@@ -56,14 +67,52 @@ class Artist(db.Model):
         return "<Artist Id: {}>".format(self.artist_id)
 
 
+# routes
 bp = Blueprint("bp", __name__, template_folder="./build")
 
 
-@bp.route("/index")
+@bp.route("/index", methods=["POST", "GET"])
 @login_required
 def index():
-    # TODO: insert the data fetched by your app main page here as a JSON
-    DATA = {"your": "data here"}
+    currentUser = Person.query.filter_by(username=current_user.username).first()
+    current_username = current_user.username
+    user_artists = currentUser.artists
+    user_artist_ids = []
+    for artists in user_artists:
+        user_artist_ids.append(artists.artist_id)
+
+    has_artists_saved = len(user_artist_ids) > 0
+    if has_artists_saved:
+        artist_len = len(user_artist_ids)
+        random_artist = random.randint(0, artist_len - 1)
+        artist = user_artist_ids[random_artist]
+        (name, img, track) = get_artist_info(artist)
+        (trackName, trackAudio, trackImg) = track
+        lyricLink = get_lyrics(trackName)
+
+    else:
+        (artist_len, name, img, track, trackName, trackImg, trackAudio, lyricLink) = (
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+    DATA = {
+        "current_username": current_username,
+        "has_artists_saved": has_artists_saved,
+        "user_artist_ids": user_artist_ids,
+        "name": name,
+        "img": img,
+        "track": track,
+        "trackName": trackName,
+        "trackImg": trackImg,
+        "trackAudio": trackAudio,
+        "lyricLink": lyricLink,
+    }
     data = json.dumps(DATA)
     return render_template(
         "index.html",
@@ -83,11 +132,6 @@ def load_user(id):
     return Person.query.get(id)
 
 
-@app.errorhandler(401)
-def page_not_found(e):
-    return Response("<p>Login failed</p>")
-
-
 @app.before_first_request
 def create_table():
     db.create_all()
@@ -96,14 +140,14 @@ def create_table():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if current_user.is_authenticated:
-        return redirect("/")
+        return redirect(url_for("bp.index"))
 
     if request.method == "POST":
         username = request.form["username"]
         user = Person.query.filter_by(username=username).first()
         if user is not None:
             login_user(user)
-            return redirect("/")
+            return redirect(url_for("bp.index"))
         if user is None:
             flash("Invalid username!")
     return render_template("login.html")
@@ -112,7 +156,7 @@ def login():
 @app.route("/register", methods=["POST", "GET"])
 def register():
     if current_user.is_authenticated:
-        return redirect("/")
+        return redirect(url_for("bp.index"))
 
     if request.method == "POST":
         username = request.form["username"]
@@ -129,65 +173,60 @@ def register():
     return render_template("register.html")
 
 
-@app.route("/", methods=["POST", "GET"])
-@login_required
-def index():
-    currentUser = Person.query.filter_by(username=current_user.username).first()
-    if request.method == "POST":
-        artistID = request.form.get("artistId")
-        try:
-            get_artist_info(artistID)
-        except:
-            flash("Invalid Spotify Artist ID!")
-            return redirect("/")
-
-        artist = Artist(artist_id=artistID, person=currentUser)
-
-        db.session.add(artist)
-        db.session.commit()
-
-        flash("Artist added!")
-
-    user_artists = currentUser.artists
-    user_artist_ids = []
-    for artists in user_artists:
-        if artists.artist_id not in user_artist_ids:
-            user_artist_ids.append(artists.artist_id)
-
-    try:
-        ARTIST_IDS = user_artist_ids
-        artist_len = len(ARTIST_IDS)
-        random_artist = random.randint(0, artist_len - 1)
-
-    except:
-        ARTIST_IDS = ["5cj0lLjcoR7YOSnhnX0Po5"]  # doja cat
-        artist_len = 0
-        random_artist = 0
-
-    artist = ARTIST_IDS[random_artist]
-    (name, img, track, topTracks) = get_artist_info(artist)
-    (trackName, trackAudio, trackImg) = track
-    lyricLink = get_lyrics(name, trackName)
-
-    return render_template(
-        "music.html",
-        artist_len=artist_len,
-        name=name,
-        img=img,
-        len=len(topTracks),
-        topTracks=topTracks,
-        track=track,
-        trackName=trackName,
-        trackImg=trackImg,
-        trackAudio=trackAudio,
-        lyricLink=lyricLink,
-    )
+@app.route("/")
+def main():
+    if current_user.is_authenticated:
+        return redirect(url_for("bp.index"))
+    return redirect("/login")
 
 
 @app.route("/logout")
 def logout():
     logout_user()
-    return redirect("/")
+    return redirect(url_for("bp.index"))
+
+
+@app.route("/save", methods=["POST", "GET"])
+def save():
+    currentUser = Person.query.filter_by(username=current_user.username).first()
+    artists_to_add = []
+    add_artists = request.json.get("add")
+    artists_to_remove = request.json.get("delete")
+    print("og artists:", currentUser.artists)
+    print("add:", add_artists)
+    if add_artists:
+        for artist in add_artists:
+            if artist not in currentUser.artists:
+                try:
+                    get_artist_info(artist)
+                except:
+                    continue
+                artists_to_add.append(artist)
+    print("artists to add:", artists_to_add)
+    if artists_to_add:
+        for artist in artists_to_add:
+            new_artist = Artist(artist_id=artist, person_id=currentUser.id)
+            db.session.add(new_artist)
+            db.session.commit()
+            jsonify({"status": "Artist(s) added!"})
+
+    if artists_to_remove:
+        for artist in artists_to_remove:
+            delete_artist = Artist.query.filter_by(artist_id=artist).first()
+            if delete_artist is not None:
+                db.session.delete(delete_artist)
+
+        print("artists to remove:", artists_to_remove)
+        db.session.commit()
+        jsonify({"status": "Artist(s) removed!"})
+
+    current_user_artists = currentUser.artists
+    current_user_artist_ids = []
+    for artists in current_user_artists:
+        current_user_artist_ids.append(artists.artist_id)
+
+    print("updated artists:", current_user_artist_ids)
+    return jsonify({"user_artists_server": current_user_artist_ids})
 
 
 app.run(

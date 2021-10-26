@@ -7,13 +7,12 @@ load_dotenv(find_dotenv())
 GENIUS_TOKEN = os.getenv("GENIUS_TOKEN")
 
 
-def get_lyrics(artist, track):
-    search_term = artist, " ", track
-    search_url = (
-        f"http://api.genius.com/search?q={search_term}&access_token={GENIUS_TOKEN}"
+def get_lyrics(track_name):
+    genius_response = requests.get(
+        "https://api.genius.com/search",
+        headers={"Authorization": f"Bearer {GENIUS_TOKEN}"},
+        params={"q": track_name},
     )
-
-    respose = requests.get(search_url)
-    json_data = respose.json()
-    lyric_search = json_data["response"]["hits"][0]["result"]["url"]
-    return lyric_search
+    genius_response_json = genius_response.json()
+    lyrics_url = genius_response_json["response"]["hits"][0]["result"]["url"]
+    return lyrics_url
