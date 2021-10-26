@@ -236,4 +236,4 @@ def save():
     return jsonify({"user_artists_server": current_user_artist_ids})
 
 
-app.run(host="0.0.0.0"), port=int(os.getenv("PORT", 8080)))
+app.run(host="0.0.0.0"), port=int(os.getenv("PORT", 8080))
