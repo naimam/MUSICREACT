@@ -1,3 +1,4 @@
+"""genius.py: uses genius api to get a song's lyrics given song name"""
 import os
 from dotenv import find_dotenv, load_dotenv
 import requests
@@ -8,6 +9,7 @@ GENIUS_TOKEN = os.getenv("GENIUS_TOKEN")
 
 
 def get_lyrics(track_name):
+    """get_lyrics(track_name):returns a track name's genius lyrics url"""
     genius_response = requests.get(
         "https://api.genius.com/search",
         headers={"Authorization": f"Bearer {GENIUS_TOKEN}"},

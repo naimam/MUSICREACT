@@ -10,15 +10,13 @@ from flask import (
     render_template,
     request,
     redirect,
-    Response,
     flash,
     Blueprint,
     url_for,
     json,
     jsonify,
 )
-from spotify import get_artist_info
-from genius import get_lyrics
+from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     LoginManager,
     login_required,
@@ -27,7 +25,8 @@ from flask_login import (
     logout_user,
     UserMixin,
 )
-from flask_sqlalchemy import SQLAlchemy
+from spotify import get_artist_info
+from genius import get_lyrics
 
 app = Flask(__name__, static_folder="./build/static")
 
@@ -75,9 +74,9 @@ bp = Blueprint("bp", __name__, template_folder="./build")
 @bp.route("/index", methods=["POST", "GET"])
 @login_required
 def index():
-    currentUser = Person.query.filter_by(username=current_user.username).first()
+    user = Person.query.filter_by(username=current_user.username).first()
     current_username = current_user.username
-    user_artists = currentUser.artists
+    user_artists = user.artists
     user_artist_ids = []
     for artists in user_artists:
         user_artist_ids.append(artists.artist_id)
@@ -87,13 +86,20 @@ def index():
         artist_len = len(user_artist_ids)
         random_artist = random.randint(0, artist_len - 1)
         artist = user_artist_ids[random_artist]
-        (name, img, track) = get_artist_info(artist)
-        (trackName, trackAudio, trackImg) = track
-        lyricLink = get_lyrics(trackName)
+        (artist_name, artist_img, track) = get_artist_info(artist)
+        (track_name, track_audio, track_img) = track
+        lyric_link = get_lyrics(track_name)
 
     else:
-        (artist_len, name, img, track, trackName, trackImg, trackAudio, lyricLink) = (
-            None,
+        (
+            artist_name,
+            artist_img,
+            track,
+            track_name,
+            track_img,
+            track_audio,
+            lyric_link,
+        ) = (
             None,
             None,
             None,
@@ -102,19 +108,19 @@ def index():
             None,
             None,
         )
-    DATA = {
+    user_data = {
         "current_username": current_username,
         "has_artists_saved": has_artists_saved,
         "user_artist_ids": user_artist_ids,
-        "name": name,
-        "img": img,
+        "name": artist_name,
+        "img": artist_img,
         "track": track,
-        "trackName": trackName,
-        "trackImg": trackImg,
-        "trackAudio": trackAudio,
-        "lyricLink": lyricLink,
+        "track_name": track_name,
+        "track_img": track_img,
+        "track_audio": track_audio,
+        "lyric_link": lyric_link,
     }
-    data = json.dumps(DATA)
+    data = json.dumps(user_data)
     return render_template(
         "index.html",
         data=data,
@@ -189,24 +195,24 @@ def logout():
 
 @app.route("/save", methods=["POST", "GET"])
 def save():
-    currentUser = Person.query.filter_by(username=current_user.username).first()
+    user = Person.query.filter_by(username=current_user.username).first()
     artists_to_add = []
     add_artists = request.json.get("add")
     artists_to_remove = request.json.get("delete")
-    print("og artists:", currentUser.artists)
+    print("og artists:", user.artists)
     print("add:", add_artists)
     if add_artists:
         for artist in add_artists:
-            if artist not in currentUser.artists:
+            if artist not in user.artists:
                 try:
                     get_artist_info(artist)
-                except:
+                except Exception:
                     continue
                 artists_to_add.append(artist)
     print("artists to add:", artists_to_add)
     if artists_to_add:
         for artist in artists_to_add:
-            new_artist = Artist(artist_id=artist, person_id=currentUser.id)
+            new_artist = Artist(artist_id=artist, person_id=user.id)
             db.session.add(new_artist)
             db.session.commit()
             jsonify({"status": "Artist(s) added!"})
@@ -221,7 +227,7 @@ def save():
         db.session.commit()
         jsonify({"status": "Artist(s) removed!"})
 
-    current_user_artists = currentUser.artists
+    current_user_artists = user.artists
     current_user_artist_ids = []
     for artists in current_user_artists:
         current_user_artist_ids.append(artists.artist_id)
