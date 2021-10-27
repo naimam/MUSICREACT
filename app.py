@@ -215,15 +215,13 @@ def save():
     artists_to_add = []
     add_artists = request.json.get("add")
     artists_to_remove = request.json.get("delete")
-    success_message = []
-    failure_message = ""
+
     if add_artists:
         for artist in add_artists:
             if artist not in user.artists:
                 try:
                     get_artist_info(artist)
                 except Exception:
-                    failure_message = "Invalid artist id(s)!"
                     continue
                 artists_to_add.append(artist)
 
@@ -232,7 +230,6 @@ def save():
             new_artist = Artist(artist_id=artist, person_id=user.user_id)
             db.session.add(new_artist)
             db.session.commit()
-        success_message.append("Artist(s) added!")
 
     if artists_to_remove:
         for artist in artists_to_remove:
@@ -241,20 +238,15 @@ def save():
                 db.session.delete(delete_artist)
 
         db.session.commit()
-        success_message.append("Artist(s) removed!")
 
     current_user_artists = user.artists
     current_user_artist_ids = []
     for artists in current_user_artists:
         current_user_artist_ids.append(artists.artist_id)
 
-    print("failure msg:", failure_message)
-    print("success msg:", success_message)
     return jsonify(
         {
             "user_artists_server": current_user_artist_ids,
-            "failure_message": failure_message,
-            "success_message": success_message,
         }
     )
 

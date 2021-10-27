@@ -1,12 +1,12 @@
-# CSC 4350 Project 1 Milestone 2 by Naima Mohamed 
+# CSC 4350 Project 1 Milestone 3 by Naima Mohamed 
 
-### A webpage that displays data on a random artist from the list of a user's saved artists. 
+### A react webpage that displays data on a random artist from the list of a user's saved artists. 
 - User signs up / log in with their username to view their account page. 
 - If first time user, page simply displays a form that instructs them to add a spotify artist ID.
-- If the artist ID is valid, it is added to the list of the user's saved artists. User can add multiple artists.
+- User can add (valid) artists and delete them. Then, they can save their changes by clicking the save button.
 - Then, the page displays data on a random artist from the list of the user's saved artists. 
 
-### View the website here: [https://ourmusic.herokuapp.com/](https://ourmusic.herokuapp.com/ "website link").
+### View the website here: [http://musicreact.herokuapp.com/](http://musicreact.herokuapp.com/ "website link").
 
 
 ## Technologies, Frameworks, Libraries, and APIs used
@@ -18,7 +18,6 @@
   * Spotify (library) - simplifies the process of accessing music data through Spotify's Web API.
   * flask (framework) - allows the web app to developed easily / fetches python data and displays it on the webpage.
     * Flask-Login - flask extension that manages user sessions
-
     * Flask-SQLAlchemy - flask extension that provides object-relational mapping between the Postgres database & the python logic.
 * HTML - displays the data on a webpage & creates forms that send HTTP POST requests to the DB Server.
 * CSS - styles the data in a readable & visually appealing way.
@@ -26,10 +25,11 @@
    *  artist: name, image, top tracks.
    *  song: name, song image, preview URL.
 * Genius API - used to get lyrics of the current song.
- * PostgreSQL - Database management system that allows a user's username and favorite artist data to be saved.
- 
+* PostgreSQL - Database management system that allows a user's username and favorite artist data to be saved.
+* React - (JavaScript framework) for keeping UI in sync with the app state - makes app interactive without overwhelming the server with requests. For example, when an artist is added, it is automatically displayed on the client side.
+* Fetch - Javascript API for sending POST and GET messages. When the save button is clicked, it sends the user's changes to the server. 
 ## Setup
-1. Install in terminal: os, dotenv, spotipy, random, requests, flask, psycopg2-binary, flask-login, flask-sqlalchemy, PostgreSQL
+1. Install in terminal: os, dotenv, spotipy, random, requests, flask, psycopg2-binary, flask-login, flask-sqlalchemy, PostgreSQL, npm 
 
 2. Create [Spotify APP](https://developer.spotify.com/documentation/web-api/ "Spotify API") and copy the Client ID and Client Secret.
 3. Create [Genius APP](https://docs.genius.com/ "Genius API") and copy the genius token.
@@ -49,7 +49,7 @@
       export DATABASE_URL = "your-heroku-db-url"
       export SECRET_KEY = "your-super-secret-app-key"
     ```
-6. If want to run on localhost: run app.py and follow the link to your browser to view the site! 
+6. Run ```npm run build ``` in your project directory terminal, and then ```python3 app.py```. Follow the link in the terminal to view the project on your local host.
 
 
 ## Technical Issues / Problems
@@ -63,6 +63,11 @@
 1. I could not figure out how to separate my DB models into another file without getting a circular import error. I also could not focus figuring it out due to fast approaching deadline. Therefore, I kept all my code DB & routes in one file: app.py.
 2. I was pushing to my Heroku master branch, but my app was not updating with my changes. After googling, I figured out that I had to [clear my build cache](https://help.heroku.com/18PI5RSY/how-do-i-clear-the-build-cache) to rebuild my app.
 3. When I was trying the figure out the problem in 2, I tested pushing to Heroku using non-specific commits like "asdfseff," not knowing that it also pushed to my GitHub branch. I attempted to use the 'rebase' command to delete those commits. However, when I deleted the commits, I had to merge my main branch into my second, and the commits appeared again.
+
+### Milestone 3
+1. I could not figure out how to display the changes after a user added / deleted an artist. I learned to use use states: ```const [artistList, setartistList] = useState(currentUserIds);``` and whenever an artist was added on deleted I used ```setArtistList = [... artistList]``` to store the current artest list to be displayed.
+2. When I deployed my app to heroku, I got an 'R10 boot timeout' error. I figured out from the [heroku help website]('https://help.heroku.com/P1AVPANS/why-is-my-node-js-app-crashing-with-an-r10-error) that the error was due to something being wrong with my app port. I realized that I had typoed in my ```app.run``` method, and changed my host to ```host="0.0.0.0"```
+3. I could create the unit tests for my python. This is because I took too long in figuring out how the client side functionality. Thankfully, my issue was fixed because John said that unit tests would be extra credit! 
 
 ## Additional Features To Implement
 ### Milestone 1:
@@ -79,3 +84,7 @@
 * I found the planning process to be very helpful in making me understand exactly what I needed to do for this milestone and in what order. This made my experience with this milestone much better than in milestone 1.
 * Something that was unexpectedly hard was setting up the database using SQL-Alchemy. At first, I tried setting up my database modelin a file called models.py, but I kept recieving a circular import error.
 * It was unexpectedly easy using Flask-Login and making it interact with the database.
+
+## Milestone 3 - Tech Stack
+- Part of the stack that I am most comfortable with: Python, because I have been using python for a long time, including using it in projects in other classes.
+- Part of the stack that I am least compfortable with: Using react, as I have not worked with it before this course, and I am not very familar with javascript in general. It was difficult for me to understand use states, and other react features.
