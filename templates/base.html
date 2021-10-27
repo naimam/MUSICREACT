@@ -5,8 +5,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <link rel="icon" 
          type="image/png" 
-         href="{{ url_for( 'static' , filename='spotify-icon.png' ) }}">
-      <link rel="stylesheet" href={{ url_for( 'static' , filename='style.css' ) }} />
+         href="../static/spotify-icon.png">
       <title>{% block title %}{% endblock %}</title>
       <!-- Fonts -->
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,7 +25,7 @@
 
       body {
          margin: 0;
-         background: rgb(0, 0, 0) url('/static/spotify-bg.png') no-repeat fixed center;
+         background: rgb(0, 0, 0) url('../static/spotify-bg.png') no-repeat fixed center;
          background-size: cover;
       }
       h1 {

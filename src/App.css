@@ -1,47 +1,12 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 :root {
 	--black: #191414;
 	--green: #1DB954;
 	--white: #EEEEEE;
 }
 
+* {
+	box-sizing: border-box;
+}
 body {
 	margin: 0;
 	background: rgb(0, 0, 0) url('spotify-bg.png') no-repeat fixed center;
@@ -98,6 +63,7 @@ a {
 }
 
 a:hover {
+	margin-top: 5px;
 	color: var(--green);
 	text-decoration: underline wavy var(--green);
 }
@@ -109,13 +75,19 @@ main {
 	margin-top: 20px;
 	margin-bottom: 20px;
 	text-align: center;
-	width: 70%;
+	width: 65%;
 	border-width: 7px;
 	border-radius: 5px;
 	border-color: var(--green);
 	border-style: solid;
 	padding: 20px;
 	overflow-y: scroll;
+}
+main a{
+	background-color: var(--black);
+	font-size: 20px;
+	padding: 5px;
+	border-radius: 5px;
 }
 
  ::-webkit-scrollbar {
@@ -125,7 +97,6 @@ main {
 #title {
 	font-family: "Open-Sans", sans-serif;
 	font-weight: bold;
-	font-style: italic;
 	font-size: 28px;
 	background-color: var(--green);
 	border-radius: 5px;
@@ -141,10 +112,6 @@ main {
 	border-color: var(--black);
 	border: 2px;
 	border-style: solid;
-}
-
-* {
-	box-sizing: border-box;
 }
 
 .column {
@@ -163,19 +130,9 @@ main {
 	clear: both;
 }
 
-@media screen and (max-width: 1000px) {
-	.column {
-		width: 100%;
-		display: block;
-		margin-bottom: 20px;
-	}
-}
-
 .card {
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
 	padding: 16px;
 	text-align: center;
-	background-color: #f1f1f1;
 }
 
 .card img {
@@ -191,14 +148,6 @@ main {
 	text-align: center;
 	color: var(--black);
 	font-family: "Roboto", sans-serif;
-}
-
-.card a {
-	background-color: var(--black);
-	padding: 8px;
-	border-radius: 5px;
-	font-size: 20px;
-	text-transform: uppercase;
 }
 
 ol {
@@ -225,14 +174,14 @@ ol {
 }
 
 input[type=text] {
-	font-size: 20px;
+	font-size: 18px;
 	border: 2px solid var(--green);
 	border-radius: 4px;
 	padding: 5px 5px;
 }
 
-input[type=submit] {
-	font-size: 20px;
+.addBtn, .saveBtn {
+	font-size: 18px;
 	background-color: var(--green);
 	border: 2px solid var(--green);
 	color: white;
@@ -242,6 +191,56 @@ input[type=submit] {
 	padding: 5px 5px;
 }
 
-input[type=submit]:focus {
+.addBtn:hover, .saveBtn:hover {
 	background-color: #1b773b;
+}
+
+.addBtn:focus, .saveBtn:focus {
+	background-color: var(--black);
+}
+.list{
+	margin: auto;
+	width: 50%;
+}
+li{
+	list-style-type: none;
+	font-size: 18px;
+	font-weight: bold;
+
+}
+.removeBtn {
+	color: white;
+	text-decoration: none;
+	background-color: #dd3b3b;
+	margin-left: 5px;
+	border: 1px solid #dd3b3b;
+	border-radius: 4px;
+	float: right;
+}
+.removeBtn:hover {
+	background-color: #a12e2e;
+}
+.removeBtn:focus {
+	background-color: #441313;
+}
+
+audio{
+	width: 100%;
+}
+@media screen and (max-width: 1200px) {
+	.column {
+		width: 100%;
+		display: block;
+		margin-bottom: 20px;
+	}
+	#title {
+		word-break: break-all;
+	}
+	.list{
+		margin: auto;
+		width: 100%;
+	}
+	.removeBtn {
+		float: none;
+	}
 }

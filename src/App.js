@@ -69,7 +69,7 @@ function App() {
   const userSavedArtists = artistList.map((item) => (
     <li>
       {item}
-      <button type="button" onClick={() => { deleteArtist(item); }}>Remove</button>
+      <button className="removeBtn" type="button" onClick={() => { deleteArtist(item); }}>Remove</button>
     </li>
   ));
 
@@ -83,7 +83,7 @@ function App() {
         </h1>
         <h1>
           {args.current_username}
-          music!
+          &apos;s music!
         </h1>
         <h1>
           <a href="/logout">
@@ -94,49 +94,55 @@ function App() {
       <main id="main">
 
         {args.has_artists_saved ? (
-          <div className="row">
-            <div className="column">
-              <div className="card">
-                <h1 id="title">
-                  Your saved artists
-                </h1>
+          <>
+            <div>
+              <h1 id="title">
+                Your saved artists
+              </h1>
+              <div className="list">
                 <ul>
                   {userSavedArtists}
                 </ul>
-                <div>
-                  <input type="text" data-testid="input-artist" ref={textInput} placeholder="Artist ID" required />
-                  <button type="button" onClick={addArtist}>Add artist</button>
+              </div>
+              <div>
+                <input type="text" data-testid="input-artist" ref={textInput} placeholder="Artist ID" required />
+                <button className="addBtn" type="button" onClick={addArtist}>Add artist</button>
+              </div>
+              <button className="saveBtn" type="button" onClick={saveArtist}>Save</button>
+            </div>
+            <div className="row">
+              <div className="column">
+                <div className="card">
+                  <h1 id="title">
+                    Now Playing:&nbsp;
+                    <i>{args.track_name}</i>
+                  </h1>
+                  <img src={args.track_img} alt="song" />
+
                 </div>
-                <button type="button" onClick={saveArtist}>Save</button>
 
               </div>
 
-              <div className="card">
-                <h1 id="title">
-                  Artist:
-                  {args.artist_name}
-                </h1>
-                <img id="artistImg" alt="Profilepic" src={args.img} />
-              </div>
+              <div className="column">
+                <div className="card">
+                  <h1 id="title">
+                    by:&nbsp;
+                    {args.artist_name}
+                  </h1>
+                  <img id="artistImg" alt="Profilepic" src={args.artist_img} />
 
-            </div>
-
-            <div className="column">
-              <div className="card">
-                <h1 id="title">
-                  Now Playing:
-                  {args.track_name}
-                </h1>
-                <img src={args.track_img} alt="song" />
-                <audio controls>
-                  <source src={args.track_audio} type="audio/mpeg" />
-                  <track kind="captions" Track audio />
-                </audio>
-                <br />
-                <a href="{args.lyric_link}">Genius Lyrics</a>
+                </div>
               </div>
             </div>
-          </div>
+            <div>
+              <audio controls>
+                <source src={args.track_audio} type="audio/mpeg" />
+                <track kind="captions" Track audio />
+              </audio>
+              <br />
+              <a href={args.lyric_link}>Genius Lyrics</a>
+            </div>
+          </>
         )
           : (
             <>
@@ -148,9 +154,9 @@ function App() {
 
               <div>
                 <input type="text" ref={textInput} data-testid="input-artist" placeholder="Artist ID" required />
-                <button type="button" onClick={addArtist}>Add artist</button>
+                <button className="addBtn" type="button" onClick={addArtist}>Add artist</button>
               </div>
-              <button type="button" onClick={saveArtist}>Save</button>
+              <button className="saveBtn" type="button" onClick={saveArtist}>Save</button>
 
             </>
           )}
