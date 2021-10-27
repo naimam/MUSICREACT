@@ -199,8 +199,7 @@ def save():
     artists_to_add = []
     add_artists = request.json.get("add")
     artists_to_remove = request.json.get("delete")
-    print("og artists:", user.artists)
-    print("add:", add_artists)
+
     if add_artists:
         for artist in add_artists:
             if artist not in user.artists:
@@ -209,7 +208,7 @@ def save():
                 except Exception:
                     continue
                 artists_to_add.append(artist)
-    print("artists to add:", artists_to_add)
+
     if artists_to_add:
         for artist in artists_to_add:
             new_artist = Artist(artist_id=artist, person_id=user.id)
@@ -223,7 +222,6 @@ def save():
             if delete_artist is not None:
                 db.session.delete(delete_artist)
 
-        print("artists to remove:", artists_to_remove)
         db.session.commit()
         jsonify({"status": "Artist(s) removed!"})
 
@@ -232,8 +230,7 @@ def save():
     for artists in current_user_artists:
         current_user_artist_ids.append(artists.artist_id)
 
-    print("updated artists:", current_user_artist_ids)
     return jsonify({"user_artists_server": current_user_artist_ids})
 
 
-app.run(host="0.0.0.0"), port=int(os.getenv("PORT", 8080))
+app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
