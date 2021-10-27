@@ -1,4 +1,8 @@
-# pylint: disable=E1101, C0413, W1508, R0903, W0603
+# pylint: disable=E1101, C0413, W1508, W0703, R0903, R0914, W0603, W0632
+"""
+    This is the main file for the application.
+    It contains the db models and the routes for the application.
+"""
 import os
 import json
 import random
@@ -47,7 +51,9 @@ db.init_app(app)
 
 # db model
 class Person(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
+    """Person model"""
+
+    user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False)
     artists = db.relationship("Artist", backref="person", lazy=True)
 
@@ -55,13 +61,15 @@ class Person(db.Model, UserMixin):
         return "<Username: {}>".format(self.username)
 
     def get_id(self):
-        return self.id
+        return self.user_id
 
 
 class Artist(db.Model):
+    """Artist model"""
+
     id = db.Column(db.Integer, primary_key=True)
     artist_id = db.Column(db.String(22))
-    person_id = db.Column(db.Integer, db.ForeignKey("person.id"))
+    person_id = db.Column(db.Integer, db.ForeignKey("person.user_id"))
 
     def __repr__(self):
         return "<Artist Id: {}>".format(self.artist_id)
@@ -74,6 +82,7 @@ bp = Blueprint("bp", __name__, template_folder="./build")
 @bp.route("/index", methods=["POST", "GET"])
 @login_required
 def index():
+    """index route: main page of app"""
     user = Person.query.filter_by(username=current_user.username).first()
     current_username = current_user.username
     user_artists = user.artists
@@ -129,23 +138,26 @@ def index():
 
 app.register_blueprint(bp)
 
-login = LoginManager()
-login.init_app(app)
-login.login_view = "login"
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
 
-@login.user_loader
-def load_user(id):
-    return Person.query.get(id)
+@login_manager.user_loader
+def load_user(user_id):
+    """user loader"""
+    return Person.query.get(user_id)
 
 
 @app.before_first_request
 def create_table():
+    """create table"""
     db.create_all()
 
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
+    """login route: login page of app"""
     if current_user.is_authenticated:
         return redirect(url_for("bp.index"))
 
@@ -162,6 +174,7 @@ def login():
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
+    """register route: register page of app"""
     if current_user.is_authenticated:
         return redirect(url_for("bp.index"))
 
@@ -182,6 +195,7 @@ def register():
 
 @app.route("/")
 def main():
+    """main route: redirects to index page"""
     if current_user.is_authenticated:
         return redirect(url_for("bp.index"))
     return redirect("/login")
@@ -189,12 +203,14 @@ def main():
 
 @app.route("/logout")
 def logout():
+    """logout route: logouts user"""
     logout_user()
     return redirect(url_for("bp.index"))
 
 
 @app.route("/save", methods=["POST", "GET"])
 def save():
+    """save route: updates users artists in db"""
     user = Person.query.filter_by(username=current_user.username).first()
     artists_to_add = []
     add_artists = request.json.get("add")
@@ -213,7 +229,7 @@ def save():
 
     if artists_to_add:
         for artist in artists_to_add:
-            new_artist = Artist(artist_id=artist, person_id=user.id)
+            new_artist = Artist(artist_id=artist, person_id=user.user_id)
             db.session.add(new_artist)
             db.session.commit()
         success_message.append("Artist(s) added!")
