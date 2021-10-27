@@ -33,8 +33,6 @@ function App() {
   const [artistList, setartistList] = useState(currentUserIds);
   const textInput = useRef(null);
 
-  let successMessage = '';
-  let failureMessage = '';
   function addArtist() {
     const toAdd = textInput.current.value;
     setartistList([...artistList, toAdd]);
@@ -62,13 +60,9 @@ function App() {
       .then((response) => response.json())
       .then((data) => {
         setartistList(data.user_artists_server);
-        successMessage = data.success_message;
-        failureMessage = data.failure_message;
         window.location.reload();
       });
   }
-  console.log('success msg', successMessage);
-  console.log('failure msg', failureMessage);
 
   const userSavedArtists = artistList.map((item) => (
     <li>
