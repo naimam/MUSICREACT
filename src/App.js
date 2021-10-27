@@ -5,8 +5,6 @@
 /* todo:
   - fix python linting errors
   - add unit tests
-  - deploy to heroku - fix workflow
-  - fix sytling
   - update README
 */
 
@@ -20,7 +18,7 @@ function App() {
     args = {
       current_username: 'clienttest',
       has_artists_saved: true,
-      user_artist_ids: ['78rUTD7y6Cy67W1RVzYs7t', '18vetuyfF5U3hdFX1TA0nI'], // pinkpantheress, datfootdrive
+      user_artist_ids: ['todelete'],
       img: '',
       lyric_link: '',
       name: '',
@@ -35,6 +33,8 @@ function App() {
   const [artistList, setartistList] = useState(currentUserIds);
   const textInput = useRef(null);
 
+  let successMessage = '';
+  let failureMessage = '';
   function addArtist() {
     const toAdd = textInput.current.value;
     setartistList([...artistList, toAdd]);
@@ -62,9 +62,13 @@ function App() {
       .then((response) => response.json())
       .then((data) => {
         setartistList(data.user_artists_server);
+        successMessage = data.success_message;
+        failureMessage = data.failure_message;
         window.location.reload();
       });
   }
+  console.log('success msg', successMessage);
+  console.log('failure msg', failureMessage);
 
   const userSavedArtists = artistList.map((item) => (
     <li>
@@ -81,7 +85,7 @@ function App() {
             <i className="fab fa-github" />
           </a>
         </h1>
-        <h1>
+        <h1 data-testid="user-title">
           {args.current_username}
           &apos;s music!
         </h1>
